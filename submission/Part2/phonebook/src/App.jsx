@@ -4,6 +4,18 @@ import PersonForm from './components/PersonForm'
 import Person from './components/Person'
 import personService from './services/persons'
 
+const Notification = ({message, isError}) => {
+  if(message === null) {
+    return null
+  }
+  const dynamicStyle = isError ? 'error' : 'notification'
+  return (
+    <div className={isError ? 'error' : 'notification'}>
+      {message}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([]) 
 
@@ -15,16 +27,38 @@ const App = () => {
 
   const [filteredPersons, setFilteredPersons] = useState([])
 
-  const hook = () => {
+  const [notificationMessage, setNotificationMessage] = useState({
+    message: null,
+    isError: false
+  })
+
+  const timeout = () => {
+    setTimeout(() => {
+      setNotificationMessage({
+        message: null,
+        isError: false
+      })
+    }, 5000)
+  }
+
+  const fetchPhonebook = () => {
     personService
     .getAll()
     .then(initialPhonebook => {
       setPersons(initialPhonebook)
       setFilteredPersons(initialPhonebook)
     })
+    .catch(error => {
+      console.log(error)
+      setNotificationMessage({
+        message: `Error occoured during getAll() function call.`,
+        isError: true
+      })
+      timeout()
+    })
   }
 
-  useEffect(hook, [])
+  useEffect(fetchPhonebook, [])
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -44,15 +78,33 @@ const App = () => {
           .update(person.id, personObject)
           .then(updatedPerson => {
             console.log(`${updatedPerson.name}'s number updated successfully.`)
-            personService
-            .getAll()
-            .then(updatedPhonebook => {
-              setPersons(updatedPhonebook)
-              setFilteredPersons(updatedPhonebook)
+            setNotificationMessage({
+              message: `${updatedPerson.name}'s number updated successfully.`,
+              isError: false
             })
+            timeout()
+            //after updating number re-render data with updated info
+            fetchPhonebook()
+          })
+          .catch(error => {
+            console.log(error)
+            var msg = error.response.status === 404 ? 
+              `Information of ${person.name} has already been removed from server.` :
+              `Error on update() function call.`
+            setNotificationMessage({
+              message: msg,
+              isError: true
+            })
+            timeout()
+            fetchPhonebook()
           })
         } else {
           console.log(`${newName}'s number update aborted.`)
+          setNotificationMessage({
+            message: `${newName}'s number update aborted.`,
+            isError: false
+          })
+          timeout()
         }
       }  
     } else {
@@ -61,6 +113,21 @@ const App = () => {
       .then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
         setFilteredPersons(filteredPersons.concat(returnedPerson))
+        setNotificationMessage({
+          message: `Added ${returnedPerson.name}`,
+          isError: false
+        })
+        timeout()
+        fetchPhonebook()
+      })
+      .catch(error => {
+        console.log(error)
+        setNotificationMessage({
+          message: `Error on create() function call.`,
+          isError: true
+        })
+        timeout()
+        fetchPhonebook()
       })
     }
     setNewName('')
@@ -89,24 +156,37 @@ const App = () => {
         .remove(person.id)
         .then(returnedPerson => {
           console.log(`${returnedPerson.name} has been successfully deleted.`)
-          personService
-            .getAll()
-            .then(updatedPhonebook => {
-              setPersons(updatedPhonebook)
-              setFilteredPersons(updatedPhonebook)
-    })
+          setNotificationMessage({
+            message: `${returnedPerson.name} has been successfully deleted.`,
+            isError: false
+          })
+          timeout()
+          //after deleting the record re-render the data
+          fetchPhonebook()
         })
         .catch(error => {
           console.log(error)
+          setNotificationMessage({
+            message: `${person.name} has already been removed from the server.`,
+            isError: true
+          })
+          timeout()
+          fetchPhonebook()
         })
     } else {
-      console.log(`deleting ${person.name} was aborted.`)
+      console.log(`Deleting ${person.name} was aborted.`)
+      setNotificationMessage({
+        message: `Deleting ${person.name} was aborted.`,
+        isError: false
+      })
+      timeout()
     }
   }
 
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notificationMessage.message} isError={notificationMessage.isError}/>
       <Filter filter={filter} handleFilter={handleFilter}/>
       <h2>Add a new</h2>
       <PersonForm addPerson={addPerson}
