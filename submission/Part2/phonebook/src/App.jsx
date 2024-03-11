@@ -4,11 +4,11 @@ import PersonForm from './components/PersonForm'
 import Person from './components/Person'
 import personService from './services/persons'
 
+// eslint-disable-next-line react/prop-types
 const Notification = ({message, isError}) => {
   if(message === null) {
     return null
   }
-  const dynamicStyle = isError ? 'error' : 'notification'
   return (
     <div className={isError ? 'error' : 'notification'}>
       {message}
@@ -121,9 +121,8 @@ const App = () => {
         fetchPhonebook()
       })
       .catch(error => {
-        console.log(error)
         setNotificationMessage({
-          message: `Error on create() function call.`,
+          message: error.response.data.error,
           isError: true
         })
         timeout()
