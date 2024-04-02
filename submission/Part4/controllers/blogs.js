@@ -63,11 +63,13 @@ blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) =
 
 })
 
-blogsRouter.put('/:id',  middleware.userExtractor, async (request, response) => {
+blogsRouter.put('/:id',  
+                // middleware.userExtractor, 
+                async (request, response) => {
 
 	const body = request.body
 
-    const user = request.user
+    const user = User.findById(body.user)
   
 	const blog = {
 		title: body.title,
@@ -81,11 +83,12 @@ blogsRouter.put('/:id',  middleware.userExtractor, async (request, response) => 
     if (!blogToUpdate) {
         return response.status(404).json({ error: 'blog not found' })
     }
-    if(!blogToUpdate.user.equals(user._id)) {
-        return response.status(401).json({ error: 'user unauthorised to update blog'})
-    }
+    // if(!blogToUpdate.user.equals(user._id)) {
+    //     return response.status(401).json({ error: 'user unauthorised to update blog'})
+    // }
 
-    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true})
+    const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {new: true}).populate('user', { username: 1, name: 1})
+    await User.updateOne({_id: user._id, "blogs._id": blog._id}, {$set: {"blogs.$": updatedBlog}})
     response.json(updatedBlog)
 })
 
