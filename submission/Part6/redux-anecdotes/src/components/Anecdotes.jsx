@@ -18,14 +18,20 @@ const Anecdote = ({ anecdote, handleClick }) => (
 )
 
 const Anecdotes = () => {
-    const anecdotes = useSelector(state => state)
+    const anecdotes = useSelector(state => state.anecdotes)
+    const filter = useSelector(state => state.filter)
     const dispatch = useDispatch()
+
+    const filteredAnecdotes = anecdotes.filter(anecdote =>
+        anecdote.content.toLowerCase().includes(filter.toLowerCase())
+    )
+
     const [sortedAnecdotes, setSortedAnecdotes] = useState([])
 
     useEffect(() => {
-        const sortedAnecdotes = [...anecdotes].sort((a, b) => b.votes - a.votes)
+        const sortedAnecdotes = [...filteredAnecdotes].sort((a, b) => b.votes - a.votes)
         setSortedAnecdotes(sortedAnecdotes)
-    }, [anecdotes])
+    }, [filteredAnecdotes])
 
     if (!anecdotes) {
         return <div>Loading...</div>

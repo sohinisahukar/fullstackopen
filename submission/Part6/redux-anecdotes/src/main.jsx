@@ -1,8 +1,14 @@
 import ReactDOM from 'react-dom/client'
-import { createStore } from 'redux'
+import { createStore,combineReducers } from 'redux'
 import { Provider } from 'react-redux'
 import App from './App'
-import reducer from './reducers/anecdoteReducer.jsx'
+import anecdoteReducer from './reducers/anecdoteReducer.jsx'
+import filterReducer from './reducers/filterReducer.jsx'
+
+const reducer = combineReducers({
+  anecdotes: anecdoteReducer,
+  filter: filterReducer
+})
 
 const store = createStore(reducer)
 
