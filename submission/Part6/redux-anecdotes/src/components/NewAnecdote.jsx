@@ -2,6 +2,7 @@
 import React from 'react'
 import { useDispatch } from 'react-redux'
 import { createAnecdote } from '../reducers/anecdoteReducer.jsx'
+import { displayNotification } from '../reducers/notificationReducer.jsx'
 
 const NewAnecdote = () => {
     const dispatch = useDispatch()
@@ -12,6 +13,7 @@ const NewAnecdote = () => {
         if (content) {
             dispatch(createAnecdote(content))
             event.target.anecd.value = ''
+            dispatch(displayNotification(`You created '${content}'`, 5))
         }
     }
 
