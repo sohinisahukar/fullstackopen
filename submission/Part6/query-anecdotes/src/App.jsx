@@ -3,10 +3,12 @@ import Notification from './components/Notification'
 
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { getAnecdotes, voteAnecdote } from './requests'
+import { NotificationProvider, useNotification } from './contexts/NotificationContext'
 
 const App = () => {
 
   const queryClient = useQueryClient()
+  const { dispatch } = useNotification()
 
   const {data: anecdotes, isLoading, isError, error} = useQuery({
     queryKey: ['anecdotes'],
@@ -18,6 +20,10 @@ const App = () => {
     mutationFn: voteAnecdote,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['anecdotes']})
+      dispatch({ type: 'SHOW', payload: 'An anecdote has been voted on!' })
+      setTimeout(() => {
+        dispatch({ type: 'HIDE' })
+      }, 5000)
     }
   })
 
@@ -60,4 +66,10 @@ const App = () => {
   )
 }
 
-export default App
+const WrappedApp = () => (
+  <NotificationProvider>
+    <App />
+  </NotificationProvider>
+)
+
+export default WrappedApp
