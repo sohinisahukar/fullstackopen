@@ -1,0 +1,32 @@
+/* library-frontend/src/index.css */
+table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  table, th, td {
+    border: 1px solid black;
+  }
+  
+  th, td {
+    padding: 10px;
+    text-align: left;
+  }
+  
+  h2 {
+    margin-top: 20px;
+  }
+
+  nav {
+    margin-bottom: 20px;
+  }
+  
+  nav a {
+    margin-right: 15px;
+    text-decoration: none;
+    color: blue;
+  }
+  
+  nav a:hover {
+    text-decoration: underline;
+  }
