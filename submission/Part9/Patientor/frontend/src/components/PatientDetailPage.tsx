@@ -1,18 +1,20 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Container, Typography, List } from '@mui/material';
-import { Patient, Diagnosis } from '../types';
+import { Container, Typography, List, Button, Box } from '@mui/material';
+import { Patient, Diagnosis, Entry } from '../types';
 import patientService from '../services/patients';
 import diagnosesService from '../services/diagnoses';
 import EntryDetails from './EntryDetails';
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import TransgenderIcon from '@mui/icons-material/Transgender';
+import AddEntryForm from './AddEntryForm';
 
 const PatientDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [diagnoses, setDiagnoses] = useState<{ [code: string]: Diagnosis }>({});
+  const [showAddEntryForm, setShowAddEntryForm] = useState(false);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -34,6 +36,20 @@ const PatientDetailPage = () => {
     fetchDiagnoses();
   }, [id]);
 
+  const handleAddEntry = (newEntry: Entry) => {
+    if (patient) {
+      setPatient({
+        ...patient,
+        entries: [...patient.entries, newEntry]
+      });
+      setShowAddEntryForm(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowAddEntryForm(false);
+  };
+
   if (!patient) {
     return <Typography>Loading...</Typography>;
   }
@@ -47,6 +63,14 @@ const PatientDetailPage = () => {
       <Typography variant="body1"><strong>SSN:</strong> {patient.ssn}</Typography>
       <Typography variant="body1"><strong>Occupation:</strong> {patient.occupation}</Typography>
       <Typography variant="body1"><strong>Date of Birth:</strong> {patient.dateOfBirth}</Typography>
+      <Box marginY={2}>
+        <Button variant="contained" color="primary" onClick={() => setShowAddEntryForm(true)}>
+          Add New Entry
+        </Button>
+      </Box>
+      {showAddEntryForm && (
+        <AddEntryForm patientId={patient.id} onAddEntry={handleAddEntry} onCancel={handleCancel} />
+      )}
       <Typography variant="h6">Entries</Typography>
       <List>
         {patient.entries.map((entry) => (

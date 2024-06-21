@@ -1,6 +1,7 @@
-// src/utils.ts
 
-import { NewPatient, Gender } from './types/patients';
+import { NewPatient, Gender, NewEntry, EntryType, HealthCheckEntry, HospitalEntry, OccupationalHealthcareEntry } from './types/patients';
+import { Diagnosis } from './types/diagnoses';
+
 
 /* Helper function to assert never, for exhaustive checking */
 const assertNever = (value: never): never => {
@@ -60,8 +61,77 @@ const toNewPatient = (object: any): NewPatient => {
     dateOfBirth: parseDateOfBirth(object.dateOfBirth),
     ssn: parseSsn(object.ssn),
     gender: parseGender(object.gender),
-    occupation: parseOccupation(object.occupation)
+    occupation: parseOccupation(object.occupation),
+    entries: []
   };
 };
 
-export default toNewPatient;
+const parseDiagnosisCodes = (object: unknown): Array<Diagnosis['code']> => {
+  if (!object || typeof object !== 'object' || !('diagnosisCodes' in object)) {
+    return [] as Array<Diagnosis['code']>;
+  }
+
+  return object.diagnosisCodes as Array<Diagnosis['code']>;
+};
+
+const parseStringField = (field: unknown, fieldName: string): string => {
+  if (!field || !isString(field)) {
+    throw new Error(`Incorrect or missing ${fieldName}`);
+  }
+  return field;
+};
+
+const parseDateField = (field: unknown, fieldName: string): string => {
+  if (!field || !isString(field) || !isDate(field)) {
+    throw new Error(`Incorrect or missing ${fieldName}`);
+  }
+  return field;
+};
+
+const parseHealthCheckRating = (rating: unknown): number => {
+  if (rating === undefined || rating === null || typeof rating !== 'number') {
+    throw new Error('Incorrect or missing healthCheckRating');
+  }
+  return rating;
+};
+
+const toNewEntry = (object: any): NewEntry => {
+  const baseEntry = {
+    description: parseStringField(object.description, 'description'),
+    date: parseDateField(object.date, 'date'),
+    specialist: parseStringField(object.specialist, 'specialist'),
+    diagnosisCodes: parseDiagnosisCodes(object),
+  };
+
+  switch (object.type) {
+    case EntryType.HealthCheck:
+      return {
+        ...baseEntry,
+        type: EntryType.HealthCheck,
+        healthCheckRating: parseHealthCheckRating(object.healthCheckRating)
+      } as HealthCheckEntry;
+    case EntryType.Hospital:
+      return {
+        ...baseEntry,
+        type: EntryType.Hospital,
+        discharge: {
+          date: parseDateField(object.discharge.date, 'discharge date'),
+          criteria: parseStringField(object.discharge.criteria, 'criteria')
+        }
+      } as HospitalEntry;
+    case EntryType.OccupationalHealthcare:
+      return {
+        ...baseEntry,
+        type: EntryType.OccupationalHealthcare,
+        employerName: parseStringField(object.employerName, 'employer name'),
+        sickLeave: object.sickLeave ? {
+          startDate: parseDateField(object.sickLeave.startDate, 'sick leave start date'),
+          endDate: parseDateField(object.sickLeave.endDate, 'sick leave end date')
+        } : undefined
+      } as OccupationalHealthcareEntry;
+    default:
+      return assertNever(object as never);
+  }
+};
+
+export { toNewPatient, toNewEntry, assertNever };
