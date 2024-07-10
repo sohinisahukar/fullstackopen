@@ -1,10 +1,7 @@
 import { useState } from 'react'
 
 const Blog = ({ blog, likeBlog, removeBlog }) => {
-  const [viewVisible, setViewVisible] = useState(true)
-
-  const hideWhenVisible = { display: viewVisible ? 'none' : '' }
-  const showWhenVisible = { display: viewVisible ? '' : 'none' }
+  const [viewVisible, setViewVisible] = useState(false)
 
   const loggedUser = JSON.parse(window.localStorage.getItem('loggedBlogappUser'))
 
@@ -14,20 +11,23 @@ const Blog = ({ blog, likeBlog, removeBlog }) => {
     <div className="blog">
       <div>
         {blog.title} {blog.author}
-        <button onClick={() => setViewVisible(false)} style={showWhenVisible}>view</button>
-        <button onClick={() => setViewVisible(true)} style={hideWhenVisible}>hide</button>
+        <button onClick={() => setViewVisible(!viewVisible)}>
+          {viewVisible ? 'hide' : 'view'}
+        </button>
       </div>
-      <div style={hideWhenVisible}>
-        <p>{blog.url}</p>
-        <p>{blog.likes}
-          <button onClick={likeBlog}>like</button>
-        </p>
-        <p>{blog.user.name}</p>
-      </div>
+      {viewVisible && (
+        <div>
+          <p>{blog.url}</p>
+          <p>
+            likes {blog.likes}
+            <button onClick={likeBlog}>like</button>
+          </p>
+          <p>{blog.user.name}</p>
+        </div>
+      )}
       <button onClick={removeBlog} style={showRemoveVisible}>remove</button>
     </div>
   )
-
 }
 
 export default Blog

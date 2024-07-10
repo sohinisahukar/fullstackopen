@@ -14,7 +14,7 @@ const BlogForm = ({ createBlog }) => {
       title: newBlog.title,
       author: newBlog.author,
       url: newBlog.url,
-      likes: newBlog.likes
+      likes: Number(newBlog.likes)
     })
 
     setNewBlog({
@@ -39,6 +39,7 @@ const BlogForm = ({ createBlog }) => {
                   type="text"
                   value={newBlog.title}
                   name="title"
+                  placeholder="title"
                   onChange={({ target }) => setNewBlog({ ...newBlog, title: target.value })}
                 />
               </td>
@@ -50,6 +51,7 @@ const BlogForm = ({ createBlog }) => {
                   type="text"
                   value={newBlog.author}
                   name="author"
+                  placeholder="author"
                   onChange={({ target }) => setNewBlog({ ...newBlog, author: target.value })}
                 />
               </td>
@@ -61,6 +63,7 @@ const BlogForm = ({ createBlog }) => {
                   type="text"
                   value={newBlog.url}
                   name="url"
+                  placeholder="url"
                   onChange={({ target }) => setNewBlog({ ...newBlog, url: target.value })}
                 />
               </td>
@@ -72,6 +75,7 @@ const BlogForm = ({ createBlog }) => {
                   type="text"
                   value={newBlog.likes}
                   name="likes"
+                  placeholder="likes"
                   onChange={({ target }) => setNewBlog({ ...newBlog, likes: target.value })}
                 />
               </td>
