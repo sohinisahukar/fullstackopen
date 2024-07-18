@@ -27,7 +27,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [loginVisible, setLoginVisible] = useState(false)
+  const [loginVisible, setLoginVisible] = useState(true)
 
   const getAllBlogs = () => {
     blogService.getAll()
@@ -94,7 +94,7 @@ const App = () => {
     blogService
       .create(blogObject)
       .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
+        setBlogs(blogs.concat({ ...returnedBlog, user: { username: user.username, name: user.name, id: user.id } }))
         setNotificationMessage({
           message: `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
           isError: false
